@@ -1,0 +1,238 @@
+Step 1: Import all required libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    ConfusionMatrixDisplay
+)
+
+
+Step 2: Load the Breast Cancer dataset
+data = load_breast_cancer()
+
+X = pd.DataFrame(data.data, columns=data.feature_names)
+y = pd.Series(data.target, name="Target")
+
+print("Dataset loaded successfully!")
+print("Number of records:", X.shape[0])
+print("Number of features:", X.shape[1])
+
+
+Step 3: Display the first five records
+print("\nFirst five records:")
+display(X.head())
+
+
+Step 4: Check the class distribution
+print("\nClass distribution:")
+
+class_distribution = y.value_counts().rename(
+    index={
+        0: "Malignant",
+        1: "Benign"
+    }
+)
+
+print(class_distribution)
+
+
+Step 5: Split the dataset into Training and Testing data
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+print("Training samples:", X_train.shape[0])
+print("Testing samples:", X_test.shape[0])
+
+
+🌳 Step 6: Train the Decision Tree model
+dt_model = DecisionTreeClassifier(random_state=42)
+
+dt_model.fit(X_train, y_train)
+
+dt_predictions = dt_model.predict(X_test)
+
+print("Decision Tree model trained successfully!")
+
+
+🌲 Step 7: Train the Random Forest model
+rf_model = RandomForestClassifier(
+    n_estimators=100,
+    random_state=42
+)
+
+rf_model.fit(X_train, y_train)
+
+rf_predictions = rf_model.predict(X_test)
+
+print("Random Forest model trained successfully!")
+
+
+📊 Step 8: Compare the performance of both models
+results = pd.DataFrame({
+    "Model": ["Decision Tree", "Random Forest"],
+    
+    "Accuracy": [
+        accuracy_score(y_test, dt_predictions),
+        accuracy_score(y_test, rf_predictions)
+    ],
+    
+    "Precision": [
+        precision_score(y_test, dt_predictions),
+        precision_score(y_test, rf_predictions)
+    ],
+    
+    "Recall": [
+        recall_score(y_test, dt_predictions),
+        recall_score(y_test, rf_predictions)
+    ],
+    
+    "F1-Score": [
+        f1_score(y_test, dt_predictions),
+        f1_score(y_test, rf_predictions)
+    ]
+})
+
+print("Model Performance Comparison")
+display(results.round(4))
+
+
+📈 Step 9: Create a bar graph for model comparison
+metrics = ["Accuracy", "Precision", "Recall", "F1-Score"]
+
+results.set_index("Model")[metrics].plot(
+    kind="bar",
+    figsize=(10, 6),
+    ylim=(0, 1.05)
+)
+
+plt.title("Decision Tree vs Random Forest")
+plt.xlabel("Machine Learning Model")
+plt.ylabel("Score")
+plt.xticks(rotation=0)
+plt.legend(loc="lower right")
+plt.grid(axis="y", linestyle="--", alpha=0.5)
+
+plt.tight_layout()
+plt.show()
+
+
+📋 Step 10: Print the Decision Tree classification report
+print("DECISION TREE CLASSIFICATION REPORT")
+
+print(
+    classification_report(
+        y_test,
+        dt_predictions,
+        target_names=data.target_names
+    )
+)
+
+
+📋 Step 11: Print the Random Forest classification report
+print("RANDOM FOREST CLASSIFICATION REPORT")
+
+print(
+    classification_report(
+        y_test,
+        rf_predictions,
+        target_names=data.target_names
+    )
+)
+
+
+🔲 Step 12: Display both Confusion Matrices
+fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+ConfusionMatrixDisplay.from_predictions(
+    y_test,
+    dt_predictions,
+    display_labels=data.target_names,
+    cmap="Blues",
+    ax=axes[0]
+)
+
+axes[0].set_title("Decision Tree Confusion Matrix")
+
+
+ConfusionMatrixDisplay.from_predictions(
+    y_test,
+    rf_predictions,
+    display_labels=data.target_names,
+    cmap="Greens",
+    ax=axes[1]
+)
+
+axes[1].set_title("Random Forest Confusion Matrix")
+
+plt.tight_layout()
+plt.show()
+
+
+⭐ Step 13: Find the Top 10 Important Features
+feature_importance = pd.Series(
+    rf_model.feature_importances_,
+    index=X.columns
+).sort_values(ascending=False)
+
+print("Top 10 Important Features:")
+display(feature_importance.head(10).to_frame("Importance"))
+
+
+📊 Step 14: Plot the Top 10 Important Features
+feature_importance.head(10).sort_values().plot(
+    kind="barh",
+    figsize=(9, 6)
+)
+
+plt.title("Top 10 Features in Random Forest")
+plt.xlabel("Importance Score")
+plt.ylabel("Features")
+
+plt.tight_layout()
+plt.show()
+
+
+🏆 Step 15: Display the Final Result
+dt_accuracy = accuracy_score(y_test, dt_predictions)
+rf_accuracy = accuracy_score(y_test, rf_predictions)
+
+print("========== FINAL RESULT ==========")
+
+print(f"Decision Tree Accuracy: {dt_accuracy:.4f}")
+print(f"Random Forest Accuracy: {rf_accuracy:.4f}")
+
+improvement = (rf_accuracy - dt_accuracy) * 100
+
+if improvement > 0:
+    print(
+        f"Random Forest improved accuracy by "
+        f"{improvement:.2f} percentage points."
+    )
+elif improvement < 0:
+    print(
+        f"Random Forest accuracy was lower by "
+        f"{abs(improvement):.2f} percentage points."
+    )
+else:
+    print("Both models achieved the same accuracy.")
+
+print("\nConclusion:")
+print("Ensemble learning combines multiple models to improve prediction stability.")
+print("Random Forest combines multiple decision trees and uses voting for classification.")
+print("The comparison shows how ensemble learning performs against a single Decision Tree.")

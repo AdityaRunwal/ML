@@ -1,0 +1,304 @@
+Step 1: Install Libraries
+pip install pandas numpy matplotlib seaborn scikit-learn
+
+
+
+Step 2: Import Libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, Ridge, Lasso
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+
+
+
+Step 3: Load the Dataset
+housing = fetch_california_housing(as_frame=True)
+df = housing.frame
+df.head()
+
+
+
+Step 4: Explore the Data
+print("Shape of dataset:", df.shape)
+
+--
+
+df.info()
+
+--
+
+df.describe()
+
+
+
+Step 5: Check Missing Values
+print("Total missing values:", df.isnull().sum().sum())
+
+
+
+Step 6: Separate Features and Target
+X = df.drop("MedHouseVal", axis=1)
+y = df["MedHouseVal"]
+
+print("Features:")
+print(X.columns)
+
+print("Target:")
+print(y.name)
+
+
+
+Step 7: Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split( X, y, test_size=0.20, random_state=42)
+
+print("Training data:", X_train.shape)
+print("Testing data:", X_test.shape)
+
+
+
+Step 8: Feature Scaling
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+print("Standardization completed.")
+
+
+
+Step 9:
+scaler.fit_transform(X_train)
+scaler.transform(X_test)
+
+
+Step 10: Correlation Heatmap
+plt.figure(figsize=(10, 7))
+
+sns.heatmap(
+    df.corr(),
+    annot=True,
+    cmap="coolwarm",
+    fmt=".2f"
+)
+
+plt.title("Correlation Heatmap")
+plt.show()
+
+
+
+Step 11: Train Linear Regression
+linear_model = LinearRegression()
+
+linear_model.fit(X_train_scaled, y_train)
+
+y_train_pred_lr = linear_model.predict(X_train_scaled)
+y_test_pred_lr = linear_model.predict(X_test_scaled)
+
+
+
+Step 12: Evaluate Linear Regression
+train_r2_lr = r2_score(y_train, y_train_pred_lr)
+test_r2_lr = r2_score(y_test, y_test_pred_lr)
+
+train_rmse_lr = np.sqrt( mean_squared_error(y_train, y_train_pred_lr))
+test_rmse_lr = np.sqrt(mean_squared_error(y_test, y_test_pred_lr))
+
+print("Linear Regression")
+print("Training R²:", train_r2_lr)
+print("Testing R² :", test_r2_lr)
+print("Training RMSE:", train_rmse_lr)
+print("Testing RMSE :", test_rmse_lr)
+
+
+
+Step 13: Train Ridge Regression
+ridge_model = Ridge(alpha=1.0)
+ridge_model.fit(X_train_scaled, y_train)
+
+y_train_pred_ridge = ridge_model.predict(X_train_scaled)
+y_test_pred_ridge = ridge_model.predict(X_test_scaled)
+
+
+
+Step 14: Evaluate Ridge Regression
+train_r2_ridge = r2_score(y_train, y_train_pred_ridge)
+test_r2_ridge = r2_score(y_test, y_test_pred_ridge)
+
+train_rmse_ridge = np.sqrt( mean_squared_error(y_train, y_train_pred_ridge))
+test_rmse_ridge = np.sqrt( mean_squared_error(y_test, y_test_pred_ridge))
+
+print("Ridge Regression")
+print("Training R²:", train_r2_ridge)
+print("Testing R² :", test_r2_ridge)
+print("Training RMSE:", train_rmse_ridge)
+print("Testing RMSE :", test_rmse_ridge)
+
+
+
+Step 15: Train Lasso Regression
+lasso_model = Lasso(alpha=0.01, max_iter=10000)
+
+lasso_model.fit(X_train_scaled, y_train)
+
+y_train_pred_lasso = lasso_model.predict(X_train_scaled)
+y_test_pred_lasso = lasso_model.predict(X_test_scaled)
+
+
+
+Step 16: Evaluate Lasso Regression
+train_r2_lasso = r2_score(y_train, y_train_pred_lasso)
+test_r2_lasso = r2_score(y_test, y_test_pred_lasso)
+
+train_rmse_lasso = np.sqrt( mean_squared_error(y_train, y_train_pred_lasso))
+test_rmse_lasso = np.sqrt(mean_squared_error(y_test, y_test_pred_lasso))
+
+print("Lasso Regression")
+print("Training R²:", train_r2_lasso)
+print("Testing R² :", test_r2_lasso)
+print("Training RMSE:", train_rmse_lasso)
+print("Testing RMSE :", test_rmse_lasso)
+
+
+
+Step 17: Compare All Models
+results = pd.DataFrame({
+    "Model": [
+        "Linear Regression",
+        "Ridge Regression",
+        "Lasso Regression"
+    ],
+    "Training R2": [
+        train_r2_lr,
+        train_r2_ridge,
+        train_r2_lasso
+    ],
+    "Testing R2": [
+        test_r2_lr,
+        test_r2_ridge,
+        test_r2_lasso
+    ],
+    "Training RMSE": [
+        train_rmse_lr,
+        train_rmse_ridge,
+        train_rmse_lasso
+    ],
+    "Testing RMSE": [
+        test_rmse_lr,
+        test_rmse_ridge,
+        test_rmse_lasso
+    ]
+})
+
+results
+
+
+
+Step 18: Compare Coefficients
+coefficients = pd.DataFrame({
+    "Feature": X.columns,
+    "Linear Regression": linear_model.coef_,
+    "Ridge": ridge_model.coef_,
+    "Lasso": lasso_model.coef_
+})
+coefficients
+
+
+
+Step 19: Plot Coefficient Comparison
+coefficients.set_index("Feature").plot(
+    kind="bar",
+    figsize=(12, 6)
+)
+
+plt.title("Comparison of Regression Coefficients")
+plt.xlabel("Features")
+plt.ylabel("Coefficient Value")
+plt.xticks(rotation=45)
+plt.axhline(0, linewidth=0.8)
+plt.tight_layout()
+plt.show()
+
+
+
+Step 20: Effect of Different Alpha Values
+alphas = [0.001, 0.01, 0.1, 1, 10, 100]
+
+ridge_scores = []
+lasso_scores = []
+
+for alpha in alphas:
+
+    ridge = Ridge(alpha=alpha)
+    ridge.fit(X_train_scaled, y_train)
+    ridge_pred = ridge.predict(X_test_scaled)
+    ridge_scores.append( r2_score(y_test, ridge_pred) )
+
+    lasso = Lasso(alpha=alpha, max_iter=10000)
+    lasso.fit(X_train_scaled, y_train)
+    lasso_pred = lasso.predict(X_test_scaled)
+    lasso_scores.append(r2_score(y_test, lasso_pred))
+
+
+
+Step 21: Plot Effect of Regularization Strength
+plt.figure(figsize=(10, 6))
+
+plt.semilogx( alphas,ridge_scores, marker="o",label="Ridge")
+plt.semilogx(alphas, lasso_scores, marker="s",label="Lasso")
+
+plt.xlabel("Alpha")
+plt.ylabel("Test R² Score")
+plt.title("Effect of Regularization Strength")
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+Step 22: Ridge Actual vs Predicted
+plt.figure(figsize=(8, 6))
+plt.scatter( y_test,y_test_pred_ridge, alpha=0.5)
+plt.xlabel("Actual Values")
+plt.ylabel("Predicted Values")
+plt.title("Ridge Regression: Actual vs Predicted")
+plt.show()
+
+
+
+Step 23: Lasso Zero Coefficients
+zero_coefficients = np.sum(
+    lasso_model.coef_ == 0
+)
+print(
+    "Number of coefficients reduced to zero:",
+    zero_coefficients
+)
+print("Lasso Coefficients:")
+for feature, coef in zip(X.columns, lasso_model.coef_):
+    print(f"{feature}: {coef:.6f}")
+
+
+
+Step 24: Test Performance Comparison Plot
+models = [
+    "Linear Regression",
+    "Ridge",
+    "Lasso"
+]
+test_r2 = [
+    test_r2_lr,
+    test_r2_ridge,
+    test_r2_lasso
+]
+
+plt.figure(figsize=(9, 6))
+plt.bar(models, test_r2)
+plt.ylabel("Test R² Score")
+plt.title("Test Performance Comparison")
+plt.show()

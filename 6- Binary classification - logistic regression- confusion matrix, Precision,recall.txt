@@ -1,0 +1,143 @@
+Step 1: Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    confusion_matrix,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    accuracy_score
+)
+
+
+
+Step 2: Load the Dataset
+df = pd.read_csv("breast-cancer.csv")
+df.head()
+
+
+
+Step 3: Check Missing Values
+df.isnull().sum()
+
+
+
+Step 4: Check Shape and Columns
+df.shape
+
+--
+
+df.columns
+
+
+
+Step 5: Drop ID Column and Encode the Target
+df = df.drop("id", axis=1)
+df["diagnosis"] = df["diagnosis"].map({"M": 1, "B": 0})
+
+
+
+Step 6: Separate Features and Target
+X = df.drop("diagnosis", axis=1)
+y = df["diagnosis"]
+
+print("Features shape:", X.shape)
+print("Target shape:", y.shape)
+
+
+
+Step 7: Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y)
+
+print("Training data:", X_train.shape)
+print("Testing data:", X_test.shape)
+
+
+
+Step 8: Feature Scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+
+
+Step 9: Train the Logistic Regression Model
+model = LogisticRegression()
+
+model.fit(X_train_scaled, y_train)
+
+print("Logistic Regression model trained successfully.")
+
+
+
+Step 10: Predict on Test Data
+y_pred = model.predict(X_test_scaled)
+
+print("Predicted values:")
+print(y_pred)
+
+
+
+Step 11: Evaluate the Model
+accuracy = accuracy_score(y_test, y_pred)
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+f1 = f1_score(y_test, y_pred)
+
+print("Accuracy :", accuracy)
+print("Precision:", precision)
+print("Recall   :", recall)
+print("F1-Score :", f1)
+
+
+
+Step 12: Confusion Matrix
+cm = confusion_matrix(y_test, y_pred)
+
+print("Confusion Matrix:")
+print(cm)
+
+
+
+Step 13: Plot the Confusion Matrix
+plt.figure(figsize=(6, 5))
+
+sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    xticklabels=["Benign", "Malignant"],
+    yticklabels=["Benign", "Malignant"]
+)
+
+plt.xlabel("Predicted Class")
+plt.ylabel("Actual Class")
+plt.title("Confusion Matrix - Logistic Regression")
+plt.show()
+
+
+---
+
+accuracy = accuracy_score(y_test,y_pred)
+print(accuracy)
+
+--
+
+recall=recall_score(y_test,y_pred)
+print(recall)
+
+--
+f1_score=f1_score(y_test,y_pred)
+print(f1_score

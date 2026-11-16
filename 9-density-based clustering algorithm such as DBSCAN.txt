@@ -1,0 +1,87 @@
+Step 1: Import the required libraries
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import make_blobs
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import DBSCAN
+
+
+Step 2: Create the main clusters
+X, y = make_blobs(
+    n_samples=300,
+    centers=3,
+    cluster_std=0.6,
+    random_state=42
+)
+
+
+Step 3: Add random noise points
+np.random.seed(42)
+
+noise = np.random.uniform(
+    low=-10,
+    high=10,
+    size=(20, 2)
+)
+
+X = np.vstack((X, noise))
+
+
+Step 4: Standardize the data
+scaler = StandardScaler()
+
+X = scaler.fit_transform(X)
+
+
+Step 5: Apply DBSCAN
+model = DBSCAN(eps=0.3, min_samples=5)
+
+labels = model.fit_predict(X)
+
+
+Step 6: Count clusters and noise points
+n_clusters = len(set(labels)) - (1 if -1 in labels else 0)
+
+n_noise = np.sum(labels == -1)
+
+print("Number of clusters:", n_clusters)
+print("Number of noise points:", n_noise)
+
+
+Step 7: Visualize the clusters and noise points
+plt.figure(figsize=(8, 6))
+
+for label in set(labels):
+
+    points = X[labels == label]
+
+    if label == -1:
+        plt.scatter(
+            points[:, 0],
+            points[:, 1],
+            c="black",
+            marker="x",
+            s=70,
+            label="Noise Points"
+        )
+
+    else:
+        plt.scatter(
+            points[:, 0],
+            points[:, 1],
+            s=40,
+            label=f"Cluster {label + 1}"
+        )
+
+plt.title("DBSCAN Clustering with Noise Points")
+plt.xlabel("Feature 1")
+plt.ylabel("Feature 2")
+
+plt.legend()
+plt.grid(True)
+
+plt.show()
+
+
+
